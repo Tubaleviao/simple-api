@@ -1,0 +1,30 @@
+{
+  "name": "simple-api",
+  "version": "1.0.0",
+  "description": "simple api using nodejs and express",
+  "main": "app.js",
+  "dependencies": {
+    "bcrypt": "^4.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongodb": "^3.5.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tubaleviao/simple-api.git"
+  },
+  "keywords": [
+    "nodejs"
+  ],
+  "author": "tubaleviao",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Tubaleviao/simple-api/issues"
+  },
+  "homepage": "https://github.com/Tubaleviao/simple-api#readme"
+}
