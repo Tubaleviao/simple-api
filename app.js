@@ -3,6 +3,7 @@ const express = require('express')
 const cors = require('cors')
 const mid = require('./middleware')
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const app = express()
 
@@ -12,11 +13,12 @@ app.use(express.json())
 app.use(mid.con)
 
 app.post('/jwt', (req, res) => {
-  const {username, pass} = req.body
-  console.log(req.body)
+  const {username, password} = req.body
+  //console.log(req.body)
   let c = record => {
     if(record){
-      bcrypt.compare(pass, record.password, (err, success) => {
+      //console.log(password, record.password)
+      bcrypt.compare(password, record.password, (err, success) => {
         if(err){ console.log(err); res.send(err);}
         else if(success){
           const token = jwt.sign({ ...record }, process.env.JWT_KEY);
