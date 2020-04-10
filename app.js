@@ -14,22 +14,24 @@ app.use(mid.con)
 
 app.post('/jwt', (req, res) => {
   const {username, password} = req.body
+  console.log(req.body)
   let c = record => {
     if(record){
+      console.log(password, record.password)
       bcrypt.compare(password, record.password, (err, success) => {
-        if(err){ console.log(err); res.send(err);}
+        if(err){ console.log(err); res.json({ok: false, msg: err});}
         else if(success){
           const token = jwt.sign({ ...record }, process.env.JWT_KEY);
           res.header("auth-token", token).json({ ok: true, token: token, data: record })
-        } else res.send("password doesn't match"); 
+        } else res.json({ok: false, msg: "password doesn't match"}); 
       });
     }else{ callback(false); }
   }
   
   let collection = req.db.collection('users');
   collection.findOne({username}, (err, record) => {
-    if(err) {console.log(err); res.send(err)}
-    else{ record==null ? res.send(`user ${username} not found`): c(record); }
+    if(err) {console.log(err); res.json({ok: false, msg: err})}
+    else{ record==null ? res.json({ok: false, msg: `user ${username} not found`}): c(record); }
   });
 })
 
