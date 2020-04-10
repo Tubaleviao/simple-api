@@ -14,10 +14,8 @@ app.use(mid.con)
 
 app.post('/jwt', (req, res) => {
   const {username, password} = req.body
-  //console.log(req.body)
   let c = record => {
     if(record){
-      //console.log(password, record.password)
       bcrypt.compare(password, record.password, (err, success) => {
         if(err){ console.log(err); res.send(err);}
         else if(success){
@@ -31,7 +29,7 @@ app.post('/jwt', (req, res) => {
   let collection = req.db.collection('users');
   collection.findOne({username}, (err, record) => {
     if(err) {console.log(err); res.send(err)}
-    else{ record==null ? res.send("not found"): c(record); }
+    else{ record==null ? res.send(`user ${username} not found`): c(record); }
   });
 })
 
