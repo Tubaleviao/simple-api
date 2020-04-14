@@ -4,6 +4,7 @@ const cors = require('cors')
 const mid = require('./middleware')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
+const superagent = require('superagent')
 
 const app = express()
 
@@ -14,10 +15,8 @@ app.use(mid.con)
 
 app.post('/jwt', (req, res) => {
   const {username, password} = req.body
-  console.log(req.body)
   let c = record => {
     if(record){
-      console.log(password, record.password)
       bcrypt.compare(password, record.password, (err, success) => {
         if(err){ console.log(err); res.json({ok: false, msg: err});}
         else if(success){
@@ -33,6 +32,12 @@ app.post('/jwt', (req, res) => {
     if(err) {console.log(err); res.json({ok: false, msg: err})}
     else{ record==null ? res.json({ok: false, msg: `user ${username} not found`}): c(record); }
   });
+})
+
+app.post('/isValid', async(req, res) => {
+  const valid = await superagent.get(req.body.url)
+  // create the jsonwebtoken and return to client
+  res.json(valid)
 })
 
 app.use((err, req, res, next) => {
