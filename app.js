@@ -34,10 +34,11 @@ app.post('/jwt', (req, res) => {
   });
 })
 
-app.post('/isValid', async(req, res) => {
+app.post('/isValid', async (req, res) => {
   const valid = await superagent.get(req.body.url)
+  const isValid = JSON.parse(valid.text).data.is_valid
   // create the jsonwebtoken and return to client
-  res.json(valid)
+  res.json({isValid})
 })
 
 app.use((err, req, res, next) => {
