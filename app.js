@@ -41,6 +41,19 @@ app.post('/isValid', async (req, res) => {
   res.json({isValid})
 })
 
+app.get('/songs', mid.auth, async (req, res) => {
+  let dir = __dirname+'/public/users/'+req.user;
+      
+  if (!fs.existsSync(dir)) {
+    res.status(404).send(`User ${req.me.username} has no songs stored in the server!`)
+  }else{
+    fs.readdir(dir, (err, files) => {
+      if(err) res.send(`Error: ${err}`)
+      else res.json(files)
+    })
+  }
+})
+
 app.use((err, req, res, next) => {
   if(err) {
     console.error(err)

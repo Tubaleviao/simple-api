@@ -1,4 +1,7 @@
 const mc = require('mongodb').MongoClient
+const jwt = require('jsonwebtoken')
+const {promisify} = require('util')
+const verify = promisify(jwt.verify)
 let db
 
 const con = async (req, res, next) => {
@@ -16,4 +19,15 @@ const con = async (req, res, next) => {
   }
 }
 
-module.exports = { con }
+const auth = async (req, res, next) => {
+  const key =  process.env.JWT_KEY
+  verify(req.get('token'), key).then((e,d) => {
+    if(e) next(e);
+    else{
+      req.user = d
+      next()
+    }
+  })
+}
+
+module.exports = { con, auth }
