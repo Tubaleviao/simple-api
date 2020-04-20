@@ -8,6 +8,7 @@ const superagent = require('superagent')
 
 const app = express()
 
+app.use('/users', express.static('../tuba.work/public/users'))
 app.use(cors())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
@@ -42,10 +43,10 @@ app.post('/isValid', async (req, res) => {
 })
 
 app.get('/songs', mid.auth, async (req, res) => {
-  let dir = __dirname+'/public/users/'+req.user;
+  let dir = `/home/tuba/nodejs/tuba.work/public/users/${req.user}`
       
   if (!fs.existsSync(dir)) {
-    res.status(404).send(`User ${req.me.username} has no songs stored in the server!`)
+    res.status(404).send(`User ${req.user} has no songs stored in the server!`)
   }else{
     fs.readdir(dir, (err, files) => {
       if(err) res.send(`Error: ${err}`)
