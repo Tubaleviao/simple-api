@@ -5,6 +5,7 @@ const mid = require('./middleware')
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const superagent = require('superagent')
+const {promisify} = require('util')
 
 const app = express()
 
@@ -36,10 +37,38 @@ app.post('/jwt', (req, res) => {
 })
 
 app.post('/isValid', async (req, res) => {
-  const valid = await superagent.get(req.body.url)
-  const isValid = JSON.parse(valid.text).data.is_valid
+  let response_json;
+  try{
+    const valid = await superagent.get(req.body.url)
+    const isValid = JSON.parse(valid.text).data.is_valid
+    if(isValid){
+      response_json.isValid = isValid
+      const {email, accessToken} = req.body.face_user
+      let collection = req.db.collection('users');
+      const foa = promisify(collection.findOne);
+      const existingUser = await foa({email})
+      if(existingUser==null){
+        const hashfy = promisify(bcrypt.hash);
+        const hash = hashfy(accessToken, 8)
+        let d = new Date();
+        const nu = {username: email.split('@')[0], password: hash, email: email, date: d.getTime()}
+        const insertOne = promisify(collection.insertOne);
+        const inserted = insertOne(nu, {w: 1})
+        if(inserted){
+          response_json.username = nu.username
+          response_json.token = jwt.sign({ ...nu }, process.env.JWT_KEY);
+        }
+      }else{
+        response_json.ok = true
+        response_json.user = existingUser
+      }
+    }
+  }catch(e){
+    response_json.ok = false
+    response_json.msg = `Error: ${e.message}`
+  }
   // create the jsonwebtoken and return to client
-  res.json({isValid})
+  res.json(response_json)
 })
 
 app.get('/songs', mid.auth, async (req, res) => {

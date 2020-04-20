@@ -21,13 +21,10 @@ const con = async (req, res, next) => {
 
 const auth = async (req, res, next) => {
   const key =  process.env.JWT_KEY
-  verify(req.get('token'), key).then((e,d) => {
-    if(e) next(e);
-    else{
+  verify(req.get('token'), key).then(d => {
       req.user = d
       next()
-    }
-  })
+  }).catch(e => next(e))
 }
 
 module.exports = { con, auth }
