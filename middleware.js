@@ -1,4 +1,6 @@
-const mc = require('mongodb').MongoClient
+var Promise = require("bluebird");
+const MongoDB = Promise.promisifyAll(require('mongodb'))
+const mc = MongoDB.MongoClient
 const jwt = require('jsonwebtoken')
 const {promisify} = require('util')
 const verify = promisify(jwt.verify)
@@ -22,7 +24,7 @@ const con = async (req, res, next) => {
 const auth = async (req, res, next) => {
   const key =  process.env.JWT_KEY
   verify(req.get('token'), key).then(d => {
-      req.user = d
+      req.user = d.username
       next()
   }).catch(e => next(e))
 }

@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const superagent = require('superagent')
 const {promisify} = require('util')
+const fs = require('fs')
 
 const app = express()
 
@@ -37,7 +38,7 @@ app.post('/jwt', (req, res) => {
 })
 
 app.post('/isValid', async (req, res) => {
-  let response_json;
+  let response_json = {};
   try{
     const valid = await superagent.get(req.body.url)
     const isValid = JSON.parse(valid.text).data.is_valid
@@ -45,15 +46,14 @@ app.post('/isValid', async (req, res) => {
       response_json.isValid = isValid
       const {email, accessToken} = req.body.face_user
       let collection = req.db.collection('users');
-      const foa = promisify(collection.findOne);
-      const existingUser = await foa({email})
+      const existingUser = await collection.findOne({email})
       if(existingUser==null){
         const hashfy = promisify(bcrypt.hash);
-        const hash = hashfy(accessToken, 8)
+        const hash = await hashfy(accessToken, 8)
         let d = new Date();
         const nu = {username: email.split('@')[0], password: hash, email: email, date: d.getTime()}
-        const insertOne = promisify(collection.insertOne);
-        const inserted = insertOne(nu, {w: 1})
+        nu.facebook = req.body.face_user
+        const inserted = await collection.insertOne(nu, {w: 1})
         if(inserted){
           response_json.username = nu.username
           response_json.token = jwt.sign({ ...nu }, process.env.JWT_KEY);
@@ -61,11 +61,12 @@ app.post('/isValid', async (req, res) => {
       }else{
         response_json.ok = true
         response_json.user = existingUser
+        response_json.token = jwt.sign({ ...existingUser }, process.env.JWT_KEY);
       }
     }
   }catch(e){
     response_json.ok = false
-    response_json.msg = `Error: ${e.message}`
+    response_json.msg = `Error: ${e}`
   }
   // create the jsonwebtoken and return to client
   res.json(response_json)
@@ -75,10 +76,10 @@ app.get('/songs', mid.auth, async (req, res) => {
   let dir = `/home/tuba/nodejs/tuba.work/public/users/${req.user}`
       
   if (!fs.existsSync(dir)) {
-    res.status(404).send(`User ${req.user} has no songs stored in the server!`)
+    res.status(404).json({ok:false, msg: `User ${req.user} has no songs stored in the server!`})
   }else{
     fs.readdir(dir, (err, files) => {
-      if(err) res.send(`Error: ${err}`)
+      if(err) res.json({ok:false, msg:`Error: ${err}`})
       else res.json(files)
     })
   }
