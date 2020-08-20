@@ -4,7 +4,7 @@
   "description": "simple api using nodejs and express",
   "main": "app.js",
   "dependencies": {
-    "bcrypt": "^4.0.1",
+    "bcrypt": "^5.0.0",
     "bluebird": "^3.7.2",
     "cors": "^2.8.5",
     "dotenv": "^8.2.0",
